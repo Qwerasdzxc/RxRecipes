@@ -76,6 +76,10 @@ class RecipeRepositoryImpl(
             }
     }
 
+    override fun getAllCategories(): Observable<List<FoodCategory>> {
+        return Observable.just(foodCategoryData)
+    }
+
     override fun getById(id: String): Observable<RecipeDetails> {
         return remoteDataSource
             .getById(id)

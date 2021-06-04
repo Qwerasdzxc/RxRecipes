@@ -26,42 +26,40 @@ class MainViewModel(
     private val publishSubject: PublishSubject<String> = PublishSubject.create()
 
     init {
-        val subscription = publishSubject
-            .debounce(200, TimeUnit.MILLISECONDS)
-            .distinctUntilChanged()
-            .switchMap { it ->
-                recipesRepository
-                    .getAllByName(it)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .doOnError {
-                        Timber.e("Error in publish subject")
-                        Timber.e(it)
-                    }
-            }
-            .subscribe(
-                {
-                    recipesState.value = RecipesState.Success(it)
-                },
-                {
-                    recipesState.value = RecipesState.Error("Error happened while fetching data from db")
-                    Timber.e(it)
-                }
-            )
-        subscriptions.add(subscription)
-    }
-
-    override fun fetchAllRecipes() {
         val subscription = recipesRepository
             .fetchAll()
-            .startWith(Resource.Loading()) //Kada se pokrene fetch hocemo da postavimo stanje na Loading
+            .startWith(Resource.Loading())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
                     when(it) {
                         is Resource.Loading -> recipesState.value = RecipesState.Loading
-                        is Resource.Success -> recipesState.value = RecipesState.DataFetched
+                        is Resource.Success -> {
+                            val subscription = publishSubject
+                                .debounce(200, TimeUnit.MILLISECONDS)
+                                .distinctUntilChanged()
+                                .switchMap { it ->
+                                    recipesRepository
+                                        .getAllByName(it)
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .doOnError {
+                                            Timber.e("Error in publish subject")
+                                            Timber.e(it)
+                                        }
+                                }
+                                .subscribe(
+                                    {
+                                        recipesState.value = RecipesState.RecipesLoaded(it)
+                                    },
+                                    {
+                                        recipesState.value = RecipesState.Error("Error happened while fetching data from db")
+                                        Timber.e(it)
+                                    }
+                                )
+                            subscriptions.add(subscription)
+                        }
                         is Resource.Error -> recipesState.value = RecipesState.Error("Error happened while fetching data from the server")
                     }
                 },
@@ -73,6 +71,10 @@ class MainViewModel(
         subscriptions.add(subscription)
     }
 
+    override fun fetchAllRecipes() {
+        TODO("Not yet implemented")
+    }
+
     override fun getAllRecipes() {
         val subscription = recipesRepository
             .getAll()
@@ -80,7 +82,24 @@ class MainViewModel(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
-                    recipesState.value = RecipesState.Success(it)
+                    recipesState.value = RecipesState.RecipesLoaded(it)
+                },
+                {
+                    recipesState.value = RecipesState.Error("Error happened while fetching data from db")
+                    Timber.e(it)
+                }
+            )
+        subscriptions.add(subscription)
+    }
+
+    override fun getAllCategories() {
+        val subscription = recipesRepository
+            .getAllCategories()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    recipesState.value = RecipesState.CategoriesLoaded(it)
                 },
                 {
                     recipesState.value = RecipesState.Error("Error happened while fetching data from db")
@@ -91,7 +110,10 @@ class MainViewModel(
     }
 
     override fun getRecipesByName(name: String) {
-        publishSubject.onNext(name)
+        if (name.isNotBlank())
+            publishSubject.onNext(name)
+        else
+            getAllCategories()
     }
 
     override fun onCleared() {

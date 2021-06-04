@@ -15,6 +15,7 @@ interface MainContract {
         fun fetchAllRecipes()
         fun getAllRecipes()
         fun getRecipesByName(name: String)
+        fun getAllCategories()
     }
 
 }

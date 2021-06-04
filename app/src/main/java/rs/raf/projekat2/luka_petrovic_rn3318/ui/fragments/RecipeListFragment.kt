@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
@@ -17,6 +16,7 @@ import rs.raf.projekat2.luka_petrovic_rn3318.R
 import rs.raf.projekat2.luka_petrovic_rn3318.databinding.FragmentRecipeListBinding
 import rs.raf.projekat2.luka_petrovic_rn3318.ui.activities.RecipeDetailsActivity
 import rs.raf.projekat2.luka_petrovic_rn3318.ui.contract.MainContract
+import rs.raf.projekat2.luka_petrovic_rn3318.ui.recyclers.adapter.FoodCategoryAdapter
 import rs.raf.projekat2.luka_petrovic_rn3318.ui.recyclers.adapter.RecipeAdapter
 import rs.raf.projekat2.luka_petrovic_rn3318.ui.view.states.RecipesState
 import rs.raf.projekat2.luka_petrovic_rn3318.ui.viewmodels.MainViewModel
@@ -33,7 +33,8 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list) {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    private lateinit var adapter: RecipeAdapter
+    private lateinit var recipeAdapter: RecipeAdapter
+    private lateinit var categoryAdapter: FoodCategoryAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,12 +62,19 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list) {
 
     private fun initRecycler() {
         binding.recipeListRecyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = RecipeAdapter(Glide.with(this), onItemClick = {
+        recipeAdapter = RecipeAdapter(Glide.with(this), onItemClick = {
             val intent = Intent(activity, RecipeDetailsActivity::class.java)
             intent.putExtra("recipe_id", it.id)
             startActivity(intent)
         })
-        binding.recipeListRecyclerView.adapter = adapter
+        binding.recipeListRecyclerView.adapter = recipeAdapter
+
+        binding.foodCategoryRecyclerView.layoutManager = LinearLayoutManager(context)
+        categoryAdapter = FoodCategoryAdapter(Glide.with(this), onItemClick = {
+            binding.recipeListSearchField.setText(it.name)
+            mainViewModel.getRecipesByName(it.name)
+        })
+        binding.foodCategoryRecyclerView.adapter = categoryAdapter
     }
 
     private fun initListeners() {
@@ -81,30 +89,35 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list) {
             Timber.e(it.toString())
             renderState(it)
         })
-        // Pravimo subscription kad observablu koji je vezan za getAll iz baze
-        // Na svaku promenu tabele, obserrvable ce emitovati na onNext sve elemente
-        // koji zadovoljavaju query
-        mainViewModel.getAllRecipes()
-        // Pokrecemo operaciju dovlacenja podataka sa servera, kada podaci stignu,
-        // bice sacuvani u bazi, tada ce se triggerovati observable na koji smo se pretplatili
-        // preko metode getAllMovies()
-        mainViewModel.fetchAllRecipes()
+        mainViewModel.getAllCategories()
     }
 
     private fun renderState(state: RecipesState) {
         when (state) {
-            is RecipesState.Success -> {
+            is RecipesState.RecipesLoaded -> {
                 showLoadingState(false)
-                adapter.submitList(state.recipes)
+                binding.recipeListRecyclerView.isVisible = true
+                binding.foodCategoryRecyclerView.isVisible = false
+                recipeAdapter.submitList(state.recipes)
             }
             is RecipesState.Error -> {
                 showLoadingState(false)
+                binding.recipeListRecyclerView.isVisible = false
+                binding.foodCategoryRecyclerView.isVisible = false
                 Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
             }
             is RecipesState.DataFetched -> {
                 showLoadingState(false)
+                binding.recipeListRecyclerView.isVisible = true
+                binding.foodCategoryRecyclerView.isVisible = false
                 Toast.makeText(context, "Fresh data fetched from the server", Toast.LENGTH_LONG)
                     .show()
+            }
+            is RecipesState.CategoriesLoaded -> {
+                showLoadingState(false)
+                binding.recipeListRecyclerView.isVisible = false
+                binding.foodCategoryRecyclerView.isVisible = true
+                categoryAdapter.submitList(state.categories)
             }
             is RecipesState.Loading -> {
                 showLoadingState(true)
@@ -114,7 +127,6 @@ class RecipeListFragment : Fragment(R.layout.fragment_recipe_list) {
 
     private fun showLoadingState(loading: Boolean) {
         binding.recipeListSearchField.isVisible = !loading
-        binding.recipeListRecyclerView.isVisible = !loading
         binding.recipeListProgressBar.isVisible = loading
     }
 

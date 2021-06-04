@@ -29,7 +29,7 @@ abstract class RecipeDao {
         insertAll(entities).blockingAwait()
     }
 
-    @Query("SELECT * FROM recipes WHERE title LIKE :name || '%'")
+    @Query("SELECT * FROM recipes WHERE title LIKE '%' || :name || '%' COLLATE NOCASE")
     abstract fun getByName(name: String): Observable<List<RecipeEntity>>
 
     @Insert( onConflict = OnConflictStrategy.REPLACE )

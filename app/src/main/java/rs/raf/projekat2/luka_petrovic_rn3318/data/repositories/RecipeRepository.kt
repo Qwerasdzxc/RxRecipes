@@ -2,6 +2,7 @@ package rs.raf.projekat2.luka_petrovic_rn3318.data.repositories
 
 import io.reactivex.Completable
 import io.reactivex.Observable
+import rs.raf.projekat2.luka_petrovic_rn3318.data.model.FoodCategory
 import rs.raf.projekat2.luka_petrovic_rn3318.data.model.Recipe
 import rs.raf.projekat2.luka_petrovic_rn3318.data.model.RecipeDetails
 import rs.raf.projekat2.luka_petrovic_rn3318.data.model.Resource
@@ -17,4 +18,5 @@ interface RecipeRepository {
     fun getById(id: String): Observable<RecipeDetails>
     fun saveRecipe(recipe: RecipeDetails) : Completable
     fun getSavedRecipes() : Observable<List<RecipeDetails>>
+    fun getAllCategories(): Observable<List<FoodCategory>>
 }
