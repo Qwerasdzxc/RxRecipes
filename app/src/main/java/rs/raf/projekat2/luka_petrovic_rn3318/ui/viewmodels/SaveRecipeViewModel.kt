@@ -1,41 +1,37 @@
 package rs.raf.projekat2.luka_petrovic_rn3318.ui.viewmodels
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.PublishSubject
-import rs.raf.projekat2.luka_petrovic_rn3318.data.model.RecipeDetails
 import rs.raf.projekat2.luka_petrovic_rn3318.data.model.SavedRecipe
 import rs.raf.projekat2.luka_petrovic_rn3318.data.repositories.RecipeRepository
-import rs.raf.projekat2.luka_petrovic_rn3318.ui.contract.RecipeDetailsContract
-import rs.raf.projekat2.luka_petrovic_rn3318.ui.view.states.RecipeDetailsState
-import rs.raf.projekat2.luka_petrovic_rn3318.ui.view.states.RecipesState
+import rs.raf.projekat2.luka_petrovic_rn3318.ui.contract.SaveRecipeContract
+import rs.raf.projekat2.luka_petrovic_rn3318.ui.view.states.SaveRecipeState
 import timber.log.Timber
 
 /**
- * Created by Qwerasdzxc on 4.6.21.
+ * Created by Qwerasdzxc on 5.6.21.
  */
-class RecipeDetailsViewModel(
+class SaveRecipeViewModel(
     private val recipesRepository: RecipeRepository
-) : ViewModel(), RecipeDetailsContract.ViewModel {
+) : ViewModel(), SaveRecipeContract.ViewModel {
 
     private val subscriptions = CompositeDisposable()
-    override val states: MutableLiveData<RecipeDetailsState> = MutableLiveData()
+    override val states: MutableLiveData<SaveRecipeState> = MutableLiveData()
 
-    override fun getRecipeById(id: String) {
+    override fun saveRecipe(recipe: SavedRecipe) {
         val subscription = recipesRepository
-            .getById(id)
+            .saveRecipe(recipe)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
-                    states.value = RecipeDetailsState.Success(it)
+                    states.value = SaveRecipeState.Success(recipe)
                 },
                 {
-                    states.value = RecipeDetailsState.Error("Error happened while fetching data")
+                    states.value = SaveRecipeState.Error("Error happened while saving recipe")
                     Timber.e(it)
                 }
             )

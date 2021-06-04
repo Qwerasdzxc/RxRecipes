@@ -1,5 +1,6 @@
 package rs.raf.projekat2.luka_petrovic_rn3318.ui.activities
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
@@ -50,8 +51,11 @@ class RecipeDetailsActivity : AppCompatActivity(R.layout.activity_recipe_details
                 binding.recipeDetailsPublisher.text = recipe.publisher
 
                 binding.recipeDetailsSaveRecipeButton.setOnClickListener {
-                    viewModel.saveRecipe(state.recipe)
-                    Toast.makeText(this, "Recipe saved", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this, SaveRecipeActivity::class.java)
+                    intent.putExtra("recipe", recipe)
+                    startActivity(intent)
+//                    viewModel.saveRecipe(state.recipe)
+//                    Toast.makeText(this, "Recipe saved", Toast.LENGTH_SHORT).show()
                 }
             }
             is RecipeDetailsState.Error -> {

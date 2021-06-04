@@ -3,8 +3,8 @@ package rs.raf.projekat2.luka_petrovic_rn3318.data.datasources.local
 import androidx.room.*
 import io.reactivex.Completable
 import io.reactivex.Observable
-import rs.raf.projekat2.luka_petrovic_rn3318.data.model.RecipeDetailsEntity
 import rs.raf.projekat2.luka_petrovic_rn3318.data.model.RecipeEntity
+import rs.raf.projekat2.luka_petrovic_rn3318.data.model.SavedRecipeEntity
 
 /**
  * Created by Qwerasdzxc on 3.6.21..
@@ -33,8 +33,8 @@ abstract class RecipeDao {
     abstract fun getByName(name: String): Observable<List<RecipeEntity>>
 
     @Insert( onConflict = OnConflictStrategy.REPLACE )
-    abstract fun saveRecipe(entity: RecipeDetailsEntity): Completable
+    abstract fun saveRecipe(entity: SavedRecipeEntity): Completable
 
-    @Query("SELECT * FROM recipe_details")
-    abstract fun getSavedRecipes(): Observable<List<RecipeDetailsEntity>>
+    @Query("SELECT * FROM saved_recipes")
+    abstract fun getSavedRecipes(): Observable<List<SavedRecipeEntity>>
 }

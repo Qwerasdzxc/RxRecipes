@@ -94,13 +94,16 @@ class RecipeRepositoryImpl(
             }
     }
 
-    override fun saveRecipe(recipe: RecipeDetails) : Completable {
+    override fun saveRecipe(recipe: SavedRecipe) : Completable {
         return localDataSource.saveRecipe(
-            RecipeDetailsEntity(
+            SavedRecipeEntity(
                 recipe.recipe_id,
                 recipe.title,
                 recipe.publisher,
+                recipe.category,
                 recipe.image_url,
+                recipe.imagePath,
+                recipe.date,
                 recipe.ingredients
             )
         )
