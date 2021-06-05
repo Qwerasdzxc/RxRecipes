@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import rs.raf.projekat2.luka_petrovic_rn3318.R
 import rs.raf.projekat2.luka_petrovic_rn3318.ui.fragments.RecipeListFragment
+import rs.raf.projekat2.luka_petrovic_rn3318.ui.fragments.SavedRecipesFragment
 
 /**
  * Created by Qwerasdzxc on 3.6.21.
@@ -18,13 +19,12 @@ class MainPagerAdapter(
     companion object {
         private const val ITEM_COUNT = 2
         const val FRAGMENT_1 = 0
-        const val FRAGMENT_2 = 1
     }
 
     override fun getItem(position: Int): Fragment {
         return when(position) {
             FRAGMENT_1 -> RecipeListFragment()
-            else -> RecipeListFragment()
+            else -> SavedRecipesFragment()
         }
     }
 
@@ -35,7 +35,7 @@ class MainPagerAdapter(
     override fun getPageTitle(position: Int): CharSequence {
         return when(position) {
             FRAGMENT_1 -> context.getString(R.string.recipes)
-            else -> context.getString(R.string.recipes)
+            else -> context.getString(R.string.saved_recipes)
         }
     }
 

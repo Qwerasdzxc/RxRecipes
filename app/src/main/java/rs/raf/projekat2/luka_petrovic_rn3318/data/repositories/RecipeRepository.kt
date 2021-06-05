@@ -14,6 +14,6 @@ interface RecipeRepository {
     fun getAllByName(name: String): Observable<List<Recipe>>
     fun getById(id: String): Observable<RecipeDetails>
     fun saveRecipe(recipe: SavedRecipe) : Completable
-    fun getSavedRecipes() : Observable<List<RecipeDetails>>
+    fun getSavedRecipes() : Observable<List<SavedRecipe>>
     fun getAllCategories(): Observable<List<FoodCategory>>
 }

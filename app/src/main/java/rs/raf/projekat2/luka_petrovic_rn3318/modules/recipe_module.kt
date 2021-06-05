@@ -9,6 +9,7 @@ import rs.raf.projekat2.luka_petrovic_rn3318.data.repositories.RecipeRepositoryI
 import rs.raf.projekat2.luka_petrovic_rn3318.ui.viewmodels.MainViewModel
 import rs.raf.projekat2.luka_petrovic_rn3318.ui.viewmodels.RecipeDetailsViewModel
 import rs.raf.projekat2.luka_petrovic_rn3318.ui.viewmodels.SaveRecipeViewModel
+import rs.raf.projekat2.luka_petrovic_rn3318.ui.viewmodels.SavedRecipesViewModel
 
 /**
  * Created by Qwerasdzxc on 3.6.21.
@@ -18,6 +19,7 @@ val recipeModule = module {
     viewModel { MainViewModel(recipesRepository = get()) }
     viewModel { RecipeDetailsViewModel(recipesRepository = get()) }
     viewModel { SaveRecipeViewModel(recipesRepository = get()) }
+    viewModel { SavedRecipesViewModel(recipesRepository = get()) }
 
     single<RecipeRepository> { RecipeRepositoryImpl(localDataSource = get(), remoteDataSource = get()) }
 

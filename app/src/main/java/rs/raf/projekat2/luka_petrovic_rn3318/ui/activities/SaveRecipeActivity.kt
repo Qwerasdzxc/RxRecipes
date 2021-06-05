@@ -1,11 +1,20 @@
 package rs.raf.projekat2.luka_petrovic_rn3318.ui.activities
 
 import android.app.DatePickerDialog
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -17,6 +26,7 @@ import rs.raf.projekat2.luka_petrovic_rn3318.ui.contract.SaveRecipeContract
 import rs.raf.projekat2.luka_petrovic_rn3318.ui.view.states.SaveRecipeState
 import rs.raf.projekat2.luka_petrovic_rn3318.ui.viewmodels.SaveRecipeViewModel
 import timber.log.Timber
+import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -27,6 +37,8 @@ class SaveRecipeActivity : AppCompatActivity(R.layout.activity_save_recipe) {
 
     private var selectedCategory: String = "Breakfast"
     private var selectedDate: Date = Calendar.getInstance().time
+
+    private var photoFile: File? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,11 +105,24 @@ class SaveRecipeActivity : AppCompatActivity(R.layout.activity_save_recipe) {
                     recipe.publisher,
                     selectedCategory,
                     recipe.image_url,
-                    null,
+                    photoFile?.absolutePath,
                     selectedDate,
                     recipe.ingredients
                 )
             )
+        }
+
+        binding.saveRecipeImage.setOnClickListener {
+            photoFile = getPhotoFile()
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            val provider = FileProvider.getUriForFile(
+                this,
+                "rs.raf.projekat2.luka_petrovic_rn3318.fileprovider",
+                photoFile!!
+            )
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, provider)
+
+            getPicture.launch(intent)
         }
 
 
@@ -106,6 +131,23 @@ class SaveRecipeActivity : AppCompatActivity(R.layout.activity_save_recipe) {
             renderState(it)
         })
     }
+
+    private fun getPhotoFile(): File {
+        val directory = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile("slika", ".jpg", directory)
+    }
+
+    private val getPicture =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                val takenImage = BitmapFactory.decodeFile(photoFile!!.absolutePath)
+                if (takenImage != null) {
+                    Glide.with(this).load(takenImage).into(
+                        binding.saveRecipeImage
+                    )
+                }
+            }
+        }
 
     private fun renderState(state: SaveRecipeState) {
         when (state) {

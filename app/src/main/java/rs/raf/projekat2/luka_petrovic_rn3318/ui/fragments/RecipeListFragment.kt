@@ -24,7 +24,6 @@ import timber.log.Timber
 
 class RecipeListFragment : Fragment(R.layout.fragment_recipe_list) {
 
-    // Koristimo by sharedViewModel jer sada view modele instanciramo kroz koin
     private val mainViewModel: MainContract.ViewModel by sharedViewModel<MainViewModel>()
 
     private var _binding: FragmentRecipeListBinding? = null

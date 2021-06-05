@@ -94,7 +94,7 @@ class RecipeRepositoryImpl(
             }
     }
 
-    override fun saveRecipe(recipe: SavedRecipe) : Completable {
+    override fun saveRecipe(recipe: SavedRecipe): Completable {
         return localDataSource.saveRecipe(
             SavedRecipeEntity(
                 recipe.recipe_id,
@@ -109,12 +109,21 @@ class RecipeRepositoryImpl(
         )
     }
 
-    override fun getSavedRecipes(): Observable<List<RecipeDetails>> {
+    override fun getSavedRecipes(): Observable<List<SavedRecipe>> {
         return localDataSource
             .getSavedRecipes()
             .map { it ->
                 it.map {
-                    RecipeDetails(it.id, it.title, it.publisher, it.imageUrl, it.ingredients)
+                    SavedRecipe(
+                        it.id,
+                        it.title,
+                        it.publisher,
+                        it.category,
+                        it.imageUrl,
+                        it.imagePath,
+                        it.date,
+                        it.ingredients
+                    )
                 }
             }
     }

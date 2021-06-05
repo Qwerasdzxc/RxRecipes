@@ -1,6 +1,8 @@
 package rs.raf.projekat2.luka_petrovic_rn3318.ui.login
 
 import android.app.Activity
+import android.content.Intent
+import android.content.SharedPreferences
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
@@ -12,14 +14,19 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.Toast
+import org.koin.android.ext.android.inject
 import rs.raf.projekat2.luka_petrovic_rn3318.databinding.ActivityLoginBinding
 
 import rs.raf.projekat2.luka_petrovic_rn3318.R
+import rs.raf.projekat2.luka_petrovic_rn3318.ui.activities.MainActivity
+import rs.raf.projekat2.luka_petrovic_rn3318.ui.activities.RecipeDetailsActivity
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var loginViewModel: LoginViewModel
     private lateinit var binding: ActivityLoginBinding
+
+    private val sharedPreferences: SharedPreferences by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,10 +66,6 @@ class LoginActivity : AppCompatActivity() {
             if (loginResult.success != null) {
                 updateUiWithUser(loginResult.success)
             }
-            setResult(Activity.RESULT_OK)
-
-            //Complete and destroy login activity once successful
-            finish()
         })
 
         username.afterTextChanged {
@@ -101,12 +104,18 @@ class LoginActivity : AppCompatActivity() {
     private fun updateUiWithUser(model: LoggedInUserView) {
         val welcome = getString(R.string.welcome)
         val displayName = model.displayName
-        // TODO : initiate successful logged in experience
+
+        sharedPreferences.edit().putBoolean("logged_in", true).apply()
+
         Toast.makeText(
             applicationContext,
             "$welcome $displayName",
             Toast.LENGTH_LONG
         ).show()
+
+        startActivity(Intent(this, MainActivity::class.java))
+        setResult(Activity.RESULT_OK)
+        finish()
     }
 
     private fun showLoginFailed(@StringRes errorString: Int) {
